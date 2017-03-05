@@ -45,29 +45,37 @@
         var slidesInitReady = false;
         var photoIDs = [];
 
-        function getPhotoFeed( callback ){
-            console.log( "getPhotoFeed start" );
+        function getPhotoFeed(onSuccessCallback, alwaysCallback){
+            console.log("getPhotoFeed start");
 
-            $.getJSON("/photoFeeds", function(json) {
-                if (json.feeds.length > 0) {
-                    console.log( json.feeds.length + " photos got" );
+            $.ajax({
+                url: "/photoFeeds",
+                dataType: "json"
+            })
+                .done(function(json){
+                    if (json.feeds.length > 0) {
+                        console.log( json.feeds.length + " photos got" );
 
-                    $.each(json.feeds, function() {
-                        if(photoIDs.indexOf(this['id']) == -1){
-                            photoIDs.push(this['id']);
+                        $.each(json.feeds, function() {
+                            if(photoIDs.indexOf(this['id']) == -1){
+                                photoIDs.push(this['id']);
 
-                            var slide = '<li><img src="' + this['photoUrl'] + '" /><div class="container"><h1>' + this['userName'] + '</h1><p>' + this['message'] + '</p></div></li>';
-                            $('.slides-container').append( slide );
+                                var slide = '<li><img src="' + this['photoUrl'] + '" /><div class="container"><h1>' + this['userName'] + '</h1><p>' + this['message'] + '</p></div></li>';
+                                $('.slides-container').append( slide );
 
-                            console.log("1 photo appened: " + this['id']);
-                        }
-                    });
-                    
-                }
-                callback();
-            }).complete(function() {
-                //callback();
-            });
+                                console.log("1 photo appened: " + this['id']);
+                            }
+                        });
+                        
+                    }
+                    onSuccessCallback();
+                })
+                .always(function(){
+                    if(alwaysCallback !== undefined){
+                        console.log("always callback running");
+                        alwaysCallback();
+                    }
+                });
         }
 
         function reqularFetchPhoto(freq) {
@@ -75,11 +83,11 @@
                     console.log( "reqular timeout setted" );
                     if(slidesInitReady == true){
                         console.log("start to updating slides");
-                        getPhotoFeed(function() {
+                        getPhotoFeed(function(){
                             $('#slides').superslides('update');
                             console.log( "slides updated" );
-                            
-                            reqularFetchPhoto(freq);
+                            }, function(){
+                                reqularFetchPhoto(freq);
                         });
                     }
                     else{
@@ -92,7 +100,7 @@
         }
 
         function initSlide() {
-            getPhotoFeed(function() {
+            getPhotoFeed(function(){
                 $('#slides').superslides({
                   animation: 'fade',
                   play: '3000',
