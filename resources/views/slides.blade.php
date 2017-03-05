@@ -42,6 +42,7 @@
   <script src="js/jquery.superslides.js" type="text/javascript" charset="utf-8"></script>
   <script>
     $( document ).ready(function() {
+        var slidesInitReady = false;
         var photoIDs = [];
 
         function getPhotoFeed( callback ){
@@ -72,12 +73,19 @@
         function reqularFetchPhoto(freq) {
             setTimeout(function() {
                     console.log( "reqular timeout setted" );
-                    getPhotoFeed(function() {
-                        $('#slides').superslides('update');
-                        console.log( "superlides updated" );
-                        
+                    if(slidesInitReady == true){
+                        console.log("start to updating slides");
+                        getPhotoFeed(function() {
+                            $('#slides').superslides('update');
+                            console.log( "slides updated" );
+                            
+                            reqularFetchPhoto(freq);
+                        });
+                    }
+                    else{
+                        console.log("slides not init ready, just waiting");
                         reqularFetchPhoto(freq);
-                    });
+                    }
                 },
                 freq
             );
@@ -90,6 +98,7 @@
                   play: '3000',
                   pagination: false
                 });
+                slidesInitReady = true;
                 console.log( "superslides ready" );
                 
                 $( document ).bind('animated.slides', function() {
