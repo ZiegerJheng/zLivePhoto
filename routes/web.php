@@ -93,26 +93,40 @@ function getPhotoFeeds()
 
     $fb->setDefaultAccessToken(session('fb_user_access_token'));
 
-    $response = $fb->get('/885989284866779/feed?fields=from,message,object_id,type');
+    $response = $fb->get('/885989284866779/feed?fields=from,message,object_id,type&limit=50');
     $groupFeeds = $response->getDecodedBody();
     
     $fbGroupPhotos = [];
     while(count($groupFeeds['data']) > 0) {
+        $allPhotosObjectIds = [];
+
         foreach($groupFeeds['data'] as $feed ){
             if('photo' != $feed['type']){
                 continue;
             }
 
-            $response = $fb->get($feed['object_id'] . '?fields=images');
-            $imageData = $response->getDecodedBody();
+            //$response = $fb->get($feed['object_id'] . '?fields=images');
+            //$imageData = $response->getDecodedBody();
 
-            $fbGroupPhotos[] = [
+            $fbGroupPhotos[$feed['object_id']] = [
                 'id' => $feed['object_id'],
                 'userName' => $feed['from']['name'],
-                'message' => (array_key_exists('message', $feed)) ? $feed['message'] : '',
-                'photoUrl' => $imageData['images'][0]['source']
+                'message' => (array_key_exists('message', $feed)) ? $feed['message'] : ''
+                //'photoUrl' => $imageData['images'][0]['source']
             ];
+
+            $allPhotosObjectIds[] = $feed['object_id'];
         }
+
+        $allPhotosObjectIdStr = implode(',', $allPhotosObjectIds);
+        $response = $fb->get('?ids=' . $allPhotosObjectIdStr . '&fields=images');
+        $imageData = $response->getDecodedBody();
+        //dd($imageData);
+
+        foreach($allPhotosObjectIds as $allPhotosObjectId){
+            $fbGroupPhotos[$allPhotosObjectId]['photoUrl'] = $imageData[$allPhotosObjectId]['images'][0]['source'];
+        }
+        //dd($fbGroupPhotos);
 
         $next = parse_url($groupFeeds['paging']['next']);
         $nextQuery = '/885989284866779/feed?' . $next['query'];
@@ -121,5 +135,10 @@ function getPhotoFeeds()
         $groupFeeds = $response->getDecodedBody();
     }
 
-    return $fbGroupPhotos;
+    $finalFBGroupPhotos = [];
+    foreach($fbGroupPhotos as $fbGroupPhoto){
+        $finalFBGroupPhotos[] = $fbGroupPhoto;
+    }
+
+    return $finalFBGroupPhotos;
 }
