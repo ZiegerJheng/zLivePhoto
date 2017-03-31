@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Superslides - A fullscreen slider for jQuery</title>
+  <title>Z-Live-Photo</title>
   <link rel="stylesheet" href="css/superslides.css">
   <style type="text/css">
     .container {
