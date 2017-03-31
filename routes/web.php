@@ -30,11 +30,7 @@ class MyLaravelPersistentDataHandler implements PersistentDataInterface
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/slides', function () {
-    return view('slides');
+    return redirect()->route('3rd-fb-login');
 });
 
 Route::get('/3rd/facebook/login', function () {
@@ -49,7 +45,7 @@ Route::get('/3rd/facebook/login', function () {
     $loginUrl = $helper->getLoginUrl(config('app.url') . '/3rd/facebook/login-callback', $permissions);
 
     return Redirect::away($loginUrl);
-});
+})->name('3rd-fb-login');
 
 Route::get('/3rd/facebook/login-callback', function () {
     $fb = new Facebook([
@@ -75,13 +71,17 @@ Route::get('/3rd/facebook/login-callback', function () {
 
     session(['fb_user_access_token' => (string) $accessToken]);
 
-    return redirect()->route('fbGroupPhoto');
+    return redirect()->route('slides');
 });
+
+Route::get('/slides', function () {
+    return view('slides');
+})->name('slides');
 
 Route::get('/photoFeeds', function() {
     $fbGroupPhotos = getPhotoFeeds();
     return response()->json([ 'feeds' => $fbGroupPhotos ]);
-})->name('fbGroupPhoto');
+});
 
 function getPhotoFeeds()
 {
