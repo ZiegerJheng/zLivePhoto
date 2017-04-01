@@ -140,5 +140,7 @@ function getPhotoFeeds()
         $finalFBGroupPhotos[] = $fbGroupPhoto;
     }
 
+    $finalFBGroupPhotos = array_reverse($finalFBGroupPhotos);
+
     return $finalFBGroupPhotos;
 }
