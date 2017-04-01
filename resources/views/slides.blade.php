@@ -50,6 +50,7 @@
 
             $.ajax({
                 url: "/photoFeeds",
+                timeout: 90000,
                 dataType: "json"
             })
                 .done(function(json){
